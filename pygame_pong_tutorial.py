@@ -1,6 +1,6 @@
 # Pre-Step: download pygame
 
-import pygame, sys, random
+import pygame, sys, random, winsound
 
 def ball_animation():
     global ball_speed_x, ball_speed_y, player_score, opponent_score, score_time
@@ -8,18 +8,36 @@ def ball_animation():
     ball.y += ball_speed_y
 
     if ball.top <= 0 or ball.bottom >= screen_height:
+        pygame.mixer.Sound.play(pong_sound)
         ball_speed_y *= -1
 
     if ball.left <= 0:
-        opponent_score += 1
+        pygame.mixer.Sound.play(score_sound)
         score_time = pygame.time.get_ticks()
+        opponent_score += 1
 
     if ball.right >= screen_width:
-        player_score += 1
+        pygame.mixer.Sound.play(score_sound)
         score_time = pygame.time.get_ticks()
+        player_score += 1
 
-    if ball.colliderect(player) or ball.colliderect(opponent):
-        ball_speed_x *= -1
+    if ball.colliderect(player) and ball_speed_x < 0: 
+        pygame.mixer.Sound(pong_sound)
+        if abs(ball.left - player.right) < 10:
+            ball_speed_x *= -1
+        elif abs(ball.bottom - player.top) <  10:
+            ball_speed_y *= 1
+        elif abs(ball.top - player.bottom) <  10:
+            ball_speed_y *= 1
+
+    if ball.colliderect(opponent) and ball_speed_x > 0:
+        pygame.mixer.Sound.play(pong_sound)
+        if abs(ball.right - opponent.left) < 10:
+            ball_speed_x *= -1
+        elif abs(ball.bottom - opponent.top) <  10:
+            ball_speed_y *= 1
+        elif abs(ball.top - opponent.bottom) <  10:
+            ball_speed_y *= 1
 
 def player_animation():
     player.y += player_speed
@@ -44,15 +62,15 @@ def ball_restart():
 
     if current_time - score_time < 700:
         number_three = game_font.render("3", False, light_grey)
-        screen.blit(number_three,(screen_width/2 - 10, screen_height/2 + 20))
+        screen.blit(number_three,(screen_width/2 - 4, screen_height/2 + 20))
 
     if 700 < current_time - score_time < 1400:
         number_two = game_font.render("2", False, light_grey)
-        screen.blit(number_two,(screen_width/2 - 10, screen_height/2 + 20))
+        screen.blit(number_two,(screen_width/2 - 4, screen_height/2 + 20))
 
     if 1400 < current_time - score_time < 2100:
         number_one = game_font.render("1", False, light_grey)
-        screen.blit(number_one,(screen_width/2 - 10, screen_height/2 + 20))
+        screen.blit(number_one,(screen_width/2 - 4, screen_height/2 + 20))
 
     if current_time - score_time < 2100:
         ball_speed_x, ball_speed_y = 0,0
@@ -93,6 +111,11 @@ score_time = True
 
 bg_color = pygame.Color('grey12')
 light_grey = (200, 200, 200)
+
+# sound
+
+pong_sound = pygame.mixer.Sound("ping_pong_8bit_plop.ogg")
+score_sound = pygame.mixer.Sound("ping_pong_8bit_beeep.ogg")
 
 while True:
     # handling input
